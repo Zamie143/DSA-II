@@ -1,67 +1,74 @@
-#include <iostream>
-#include <climits>
+#include <bits/stdc++.h>
 using namespace std;
 
-const int MAX = 100;
-const int INF = INT_MAX;
+#define MAX_NODES 100
+#define INF INT_MAX
+int graph[MAX_NODES][MAX_NODES]; // Adjacency matrix
+int dist[MAX_NODES];             // Distance array
+bool visited[MAX_NODES];         // Visited nodes
 
-void dijkstra(int graph[MAX][MAX], int V, int src) {
-    int dist[MAX];      // Shortest distance from src to i
-    bool visited[MAX];  // True if vertex i is included in shortest path tree
+int extractMin(int n) {
+    int minDist = INF, minIndex = -1;
+    for (int i = 0; i < n; i++) {
+        if (!visited[i] && dist[i] < minDist) {
+            minDist = dist[i];
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
 
-    // Initialize all distances as INFINITE and visited[] as false
-    for (int i = 0; i < V; i++) {
+void dijkstra(int n, int source) {
+    for (int i = 0; i < n; i++) {
         dist[i] = INF;
         visited[i] = false;
     }
 
-    dist[src] = 0;  // Distance to source is 0
+    dist[source] = 0;
 
-    for (int count = 0; count < V - 1; count++) {
-        // Pick the minimum distance vertex from the unvisited ones
-        int minDist = INF, u;
-
-        for (int i = 0; i < V; i++) {
-            if (!visited[i] && dist[i] <= minDist) {
-                minDist = dist[i];
-                u = i;
-            }
-        }
+    for (int count = 0; count < n - 1; count++) {
+        int u = extractMin(n);
+        if (u == -1) break;
 
         visited[u] = true;
 
-        // Update dist[v] for all adjacent vertices of u
-        for (int v = 0; v < V; v++) {
+        for (int v = 0; v < n; v++) {
             if (!visited[v] && graph[u][v] && dist[u] != INF &&
-                dist[u] + graph[u][v] < dist[v]) {
+                dist[v] > dist[u] + graph[u][v]) {
                 dist[v] = dist[u] + graph[u][v];
             }
         }
     }
 
-    // Print the shortest distances
-    cout << "Vertex \t Distance from Source\n";
-    for (int i = 0; i < V; i++)
-        cout << i << " \t\t " << dist[i] << endl;
+    cout << "Vertex   Distance from Source " << source << "\n";
+    for (int i = 0; i < n; i++) {
+        cout << i << "\t\t";
+        if (dist[i] == INF)
+            cout << -1 << "\n";
+        else
+            cout << dist[i] << "\n";
+    }
 }
 
 int main() {
-    int V;
-    cout << "Enter number of vertices: ";
-    cin >> V;
+    int n, m;
+    cout << "Enter number of vertices and edges: ";
+    cin >> n >> m;
 
-    int graph[MAX][MAX];
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            graph[i][j] = 0;
 
-    cout << "Enter adjacency matrix (0 if no edge):\n";
-    for (int i = 0; i < V; i++)
-        for (int j = 0; j < V; j++)
-            cin >> graph[i][j];
-
-    int source;
+    cout << "Enter edges (u v w):\n";
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        graph[u][v] = w;
+        graph[v][u] = w; // Remove this line for directed graph
+    }
+   int source;
     cout << "Enter source vertex: ";
     cin >> source;
-
-    dijkstra(graph, V, source);
-
+   dijkstra(n, source);
     return 0;
 }
